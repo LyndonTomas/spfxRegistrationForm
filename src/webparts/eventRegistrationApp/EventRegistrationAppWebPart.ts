@@ -6,7 +6,7 @@ import {
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 //import type { IReadonlyTheme } from '@microsoft/sp-component-base';
 //import { escape } from '@microsoft/sp-lodash-subset';
-
+import { IEventRegistration } from './IEventRegistration';
 import styles from './EventRegistrationAppWebPart.module.scss';
 import * as strings from 'EventRegistrationAppWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse, ISPHttpClientOptions } from '@microsoft/sp-http';
@@ -61,10 +61,62 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
 
   }
   private  _bindAllEvents(): void {
+    // create item
     this.domElement.querySelector('#btnCreate')?.addEventListener('click', () =>{
       this.CreateItem();
     })
+
+    // read item
+    this.domElement.querySelector('#btnRead')?.addEventListener('click', () =>{
+      this.readItems();
+    })
   }
+
+  // read items
+  private _getListItems(): Promise<IEventRegistration[]>{
+    
+    const siteURL : string = `${this.context.pageContext.site.absoluteUrl}/Lyndon/_api/web/lists/getbytitle('${encodeURIComponent('Registration Project')}')/items`;
+    
+    return this.context.spHttpClient.get(siteURL, SPHttpClient.configurations.v1)
+    .then((response)=>{
+      return response.json();
+    }).then((json) =>{
+      return json.value
+    })as Promise<IEventRegistration[]>;
+  }
+
+  // display read items
+  private readItems():void{
+    this._getListItems().then((listItems) =>{
+      let html: string = '<table border=1 width=100% style="border-collapse:collapse">' +
+      '<thead>' +
+          '<tr>'+
+            '<th>ID</th>' +
+            '<th>User Name</th>' +
+            '<th>Email</th>' +
+            '<th>Batch</th>' +
+            '<th>Level of Knowledge</th>' +
+          '</tr>' +
+        '</thead>';
+      listItems.forEach((listItem)=>{
+        html +=`
+        <tr>
+        <td>${listItem.Id}</td>
+        <td>${listItem.Title}</td>
+        <td>${listItem.Email}</td>
+        <td>${listItem.Batch}</td>
+        <td>${listItem.LevelofKnowledge}</td>
+        </tr>
+        `;
+        html += '</table>';
+        const listContainer: Element = document.getElementById("listItems") as HTMLDivElement;
+        listContainer.innerHTML = html;
+      })
+
+    })
+  }
+
+
   // functions end
 
 
@@ -76,7 +128,7 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
             <td><b>Enter User ID</b></td>
             <td><input type="text" id="txtID"></td>
             <td>
-                <input type="submit" id="btnRead" value="Read Registered User Info">
+                <input type="submit" id="btnSingleItemRead" value="Read Registered User Info">
             </td>
         </tr>
         <tr>
@@ -120,7 +172,12 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
         </tr>
     </table>
     <div id="divStatus"></div>
-  </div>`;
+  </div>
+  <br>
+  <hr>
+  <div id="listItems">
+  </div>
+  `;
   this._bindAllEvents();
   }
 
