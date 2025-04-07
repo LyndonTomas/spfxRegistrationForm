@@ -70,6 +70,11 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
     this.domElement.querySelector('#btnRead')?.addEventListener('click', () =>{
       this.readItems();
     })
+
+    //get item via Id
+    this.domElement.querySelector('#btnSingleItemRead')?.addEventListener('click', () =>{
+      this.readItemById();
+    })
   }
 
   // read items
@@ -83,6 +88,44 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
     }).then((json) =>{
       return json.value
     })as Promise<IEventRegistration[]>;
+  }
+
+  // read items
+  private _getListItemsById(Id:string): Promise<IEventRegistration>{
+    
+    const siteURL : string = `${this.context.pageContext.site.absoluteUrl}/Lyndon/_api/web/lists/getbytitle('${encodeURIComponent('Registration Project')}')/items?$filter=Id eq ${Id}`;
+
+    return this.context.spHttpClient.get(siteURL, SPHttpClient.configurations.v1)
+    .then((response)=>{
+      return response.json();
+    }).then((json) =>{
+      const item: any = json.value[0];
+      const listItem:IEventRegistration = item as IEventRegistration;
+      return listItem;
+    })as Promise<IEventRegistration>;
+  }
+
+  private readItemById():void{
+    const id = document.getElementById("txtID") as HTMLInputElement;
+    const idValue: string = id.value;
+    this._getListItemsById(idValue)
+    .then(listItem =>{
+    const userName = document.getElementById("txtUserName") as HTMLInputElement;
+    userName.value = listItem.Title;
+
+    const email = document.getElementById("txtEmail") as HTMLInputElement;
+    email.value = listItem.Email;
+
+    const batch = document.getElementById("ddlBatch") as HTMLSelectElement;
+    batch.value = listItem.Batch;
+    const levelOfKnowledge = document.getElementById("ddlLevelOfKnowledge") as HTMLSelectElement;
+    levelOfKnowledge.value = listItem.LevelofKnowledge;
+    }).catch(
+      error =>{
+        let errMessage:Element = document.getElementById('divStatus') as HTMLDivElement;
+        errMessage.innerHTML = "An error has occurred " + error.status +" - "+ error.statusText;
+      }
+    )
   }
 
   // display read items
@@ -108,11 +151,11 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
         <td>${listItem.LevelofKnowledge}</td>
         </tr>
         `;
-        html += '</table>';
+        
+      })
+      html += '</table>';
         const listContainer: Element = document.getElementById("listItems") as HTMLDivElement;
         listContainer.innerHTML = html;
-      })
-
     })
   }
 
