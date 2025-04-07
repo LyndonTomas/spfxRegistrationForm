@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "event-registration-app-client-side-solution",
+    "id": "b9a1e6cd-38c8-4e69-ab76-a155bb8d4429",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "event-registration-app description"
+      },
+      "longDescription": {
+        "default": "event-registration-app description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "event-registration-app Feature",
+        "description": "The feature that activates elements of the event-registration-app solution.",
+        "id": "b2b393ca-9ec1-43c7-b9c8-d665fe916607",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/event-registration-app.sppkg"
+  }
+}
