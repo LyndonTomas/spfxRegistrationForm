@@ -60,6 +60,82 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
     })
 
   }
+
+
+  private updateListItem():void{
+
+    // get inputs
+    const userName = document.getElementById("txtUserName") as HTMLInputElement;
+    const userNameValue: string = userName.value;
+    const email = document.getElementById("txtEmail") as HTMLInputElement;
+    const emailValue: string = email.value;
+    const batch = document.getElementById("ddlBatch") as HTMLSelectElement;
+    const batchValue: string = batch.value;
+    const levelOfKnowledge = document.getElementById("ddlLevelOfKnowledge") as HTMLSelectElement;
+    const levelOfKnowledgeValue: string = levelOfKnowledge.value;
+    
+    const Id = document.getElementById("txtID") as HTMLInputElement;
+    const IdValue: string = Id.value;
+
+    const siteURL : string = `${this.context.pageContext.site.absoluteUrl}/Lyndon/_api/web/lists/getbytitle('${encodeURIComponent('Registration Project')}')/items(${IdValue})`;
+
+    const itemBody:any = {
+      "Title": userNameValue,
+      "Email": emailValue,
+      "Batch": batchValue,
+      "LevelofKnowledge": levelOfKnowledgeValue
+    }
+
+    const headers:any={
+      "X-HTTP-Method": "MERGE",
+      "IF-MATCH": "*"
+    }
+
+    const spHttpClientOptions: ISPHttpClientOptions = {
+      "headers": headers,
+      body: JSON.stringify(itemBody)
+    };
+
+    this.context.spHttpClient.post(siteURL, SPHttpClient.configurations.v1, spHttpClientOptions)
+    .then((response:SPHttpClientResponse) =>{
+      if(response.status === 204){
+        const statusmessage:Element = document.getElementById("divStatus") as HTMLDivElement;
+        statusmessage.innerHTML = "Item Updated Successfully";
+      }else{
+        const statusmessage:Element = document.getElementById("divStatus") as HTMLDivElement;
+        statusmessage.innerHTML = "An error has occurred " + response.status+" - "+ response.statusText;
+      }
+    })
+  }
+
+  private deleteListItem():void{
+    const Id = document.getElementById("txtID") as HTMLInputElement;
+    const IdValue: string = Id.value;
+
+    const siteURL : string = `${this.context.pageContext.site.absoluteUrl}/Lyndon/_api/web/lists/getbytitle('${encodeURIComponent('Registration Project')}')/items(${IdValue})`;
+
+    const headers:any={
+      "X-HTTP-Method": "DELETE",
+      "IF-MATCH": "*"
+    }
+
+
+    const spHttpClientOptions: ISPHttpClientOptions = {
+      "headers": headers
+    };
+
+    this.context.spHttpClient.post(siteURL, SPHttpClient.configurations.v1, spHttpClientOptions)
+    .then((response:SPHttpClientResponse) =>{
+      if(response.status === 204){
+        const statusmessage:Element = document.getElementById("divStatus") as HTMLDivElement;
+        statusmessage.innerHTML = "Item Deleted Successfully!";
+      }else{
+        const statusmessage:Element = document.getElementById("divStatus") as HTMLDivElement;
+        statusmessage.innerHTML = "An error has occurred " + response.status+" - "+ response.statusText;
+      }
+    })
+  }
+
   private  _bindAllEvents(): void {
     // create item
     this.domElement.querySelector('#btnCreate')?.addEventListener('click', () =>{
@@ -74,6 +150,16 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
     //get item via Id
     this.domElement.querySelector('#btnSingleItemRead')?.addEventListener('click', () =>{
       this.readItemById();
+    })
+
+    //update record item via Id
+    this.domElement.querySelector('#btnUpdate')?.addEventListener('click', () =>{
+      this.updateListItem();
+    })
+
+    // delete item
+    this.domElement.querySelector('#btnDelete')?.addEventListener('click', () =>{
+      this.deleteListItem();
     })
   }
 
@@ -157,9 +243,10 @@ export default class EventRegistrationAppWebPart extends BaseClientSideWebPart<I
         const listContainer: Element = document.getElementById("listItems") as HTMLDivElement;
         listContainer.innerHTML = html;
     })
+
+
+    
   }
-
-
   // functions end
 
 
